@@ -14,7 +14,7 @@ class PageInfo:
     references: list[str]
 
     def __str__(self):
-        return f"<Page: title={self.title}"
+        return f"<Page: title={self.title}; Letter: {self.letter}"
 
     def __repr__(self):
         return self.__str__()
@@ -39,7 +39,7 @@ def main(xml_file):
             if field.tag.endswith("title"):
                 title = field.text
                 letter = title[-1]
-                if letter.isalpha():
+                if letter.isalpha() and letter.isupper():
                     letter = translit(letter, "bg", reversed=True)
                 else:
                     letter = None
@@ -48,12 +48,14 @@ def main(xml_file):
                     if subfield.tag.endswith("text"):
                         text = subfield.text
         page_obj = PageInfo(title=title, letter=letter, text=text, references=[])
+        print(page_obj)
         page_obj.collect_references()
         obj_pages.append(page_obj)
     print(f"Collected a total of {len(obj_pages)} unique pages")
-    all_references = open(f"page-references/all-verbs-references.txt", "w+")
+    all_references = open(f"./page-references/all-verbs-references.txt", "w+")
     for page in obj_pages:
-        letter_reference = open(f"./data/page-references/{page.letter}-verbs-references.txt", "w+")
+        letter_reference = open(f"./page-references/{page.letter}-verbs-references.txt", "w+")
+        print(f"Writing page for letter '{page.letter}' || File: {letter_reference.name}")
         for ref in page.references:
             all_references.write(f"{ref}\n")
             letter_reference.write(f"{ref}\n")
